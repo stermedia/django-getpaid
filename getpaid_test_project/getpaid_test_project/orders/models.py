@@ -1,6 +1,5 @@
 from django.core.urlresolvers import reverse
 from django.db import models
-import getpaid
 
 class Order(models.Model):
     """
@@ -22,8 +21,6 @@ class Order(models.Model):
     def clean(self):
         self.currency = self.currency.upper()
 
-
-getpaid.register_to_payment(Order, unique=False, related_name='payments')
 
 #noinspection PyUnresolvedReferences
 import listeners

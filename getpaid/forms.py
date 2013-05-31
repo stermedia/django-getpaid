@@ -7,7 +7,6 @@ from django.forms.widgets import HiddenInput, RadioSelect, RadioFieldRenderer, R
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
-from getpaid.models import Order
 from utils import get_backend_choices, import_name
 
 
@@ -53,7 +52,7 @@ class PaymentMethodForm(forms.Form):
             widget=PaymentRadioSelect,
         )
 
-    order = ModelChoiceField(widget=HiddenInput, queryset=Order.objects.all())
+    # order = ModelChoiceField(widget=HiddenInput, queryset=Order.objects.all())
 
     def clean_order(self):
         if hasattr(self.cleaned_data['order'], 'is_ready_for_payment'):

@@ -1,11 +1,11 @@
+from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from datetime import datetime
 import sys
-from abstract_mixin import AbstractMixin
 import signals
-from utils import import_backend_modules
 
 PAYMENT_STATUS_CHOICES = (
         ('new', _("new")),
@@ -15,13 +15,7 @@ PAYMENT_STATUS_CHOICES = (
         ('failed', _("failed")),
         )
 
-
-class PaymentManager(models.Manager):
-    def get_query_set(self):
-        return super(PaymentManager, self).get_query_set().select_related('order')
-
-
-class PaymentFactory(models.Model, AbstractMixin):
+class Payment(models.Model):
     """
     This is an abstract class that defines a structure of Payment model that will be
     generated dynamically with one additional field: ``order``
@@ -36,8 +30,14 @@ class PaymentFactory(models.Model, AbstractMixin):
     external_id = models.CharField(_("external id"), max_length=64, blank=True, null=True)
     description = models.CharField(_("description"), max_length=128, blank=True, null=True)
 
+    order_content_type = models.ForeignKey(ContentType)
+    order_object_id = models.PositiveIntegerField()
+    order = generic.GenericForeignKey('order_content_type', 'order_object_id')
+
     class Meta:
-        abstract = True
+        ordering = ('-created_on',)
+        verbose_name = _("Payment")
+        verbose_name_plural = _("Payments")
 
     def __unicode__(self):
         return _("Payment #%(id)d") % {'id': self.id}
@@ -108,35 +108,3 @@ class PaymentFactory(models.Model, AbstractMixin):
         """
         self.change_status('failed')
 
-
-from django.db.models.loading import cache as app_cache, register_models
-#from utils import import_backend_modules
-
-
-def register_to_payment(order_class, **kwargs):
-    """
-    A function for registering unaware order class to ``getpaid``. This will
-    generate a ``Payment`` model class that will store payments with
-    ForeignKey to original order class
-
-    This also will build a model class for every enabled backend.
-    """
-    global Payment
-    global Order
-
-    class Payment(PaymentFactory.construct(order=order_class, **kwargs)):
-        objects = PaymentManager()
-
-        class Meta:
-            ordering = ('-created_on',)
-            verbose_name = _("Payment")
-            verbose_name_plural = _("Payments")
-
-    Order = order_class
-
-    # Now build models for backends
-
-    backend_models_modules = import_backend_modules('models')
-    for backend_name, models in backend_models_modules.items():
-        app_cache.register_models(backend_name, *models.build_models(Payment))
-    return Payment

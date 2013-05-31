@@ -6,6 +6,8 @@ django-getpaid changes
 * Adding paymill backend
 * PEP 8 improvements
 * Adding support for django 1.5 in test project (+ tests)
+* switching from dynamic django models to contenttype
+
 
 Version 1.5.1
 -------------
