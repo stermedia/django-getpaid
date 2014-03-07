@@ -5,11 +5,11 @@ from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
-from django.views.generic import DetailView
-from django.views.generic.base import RedirectView, TemplateView
+from django.views.generic.base import RedirectView
 from django.views.generic.edit import FormView
+
 from getpaid.forms import PaymentMethodForm
-from getpaid.models import Payment
+from getpaid.models import Payment  # flake8: noqa
 from getpaid.signals import redirecting_to_payment_gateway_signal
 
 
@@ -29,11 +29,13 @@ class NewPaymentView(FormView):
 
     def form_valid(self, form):
         from getpaid.models import Payment
+
         payment = Payment.create(form.cleaned_data['order'], form.cleaned_data['backend'])
         processor = payment.get_processor()(payment)
         gateway_url_tuple = processor.get_gateway_url(self.request)
         payment.change_status('in_progress')
-        redirecting_to_payment_gateway_signal.send(sender=None, request=self.request, order=form.cleaned_data['order'], payment=payment, backend=form.cleaned_data['backend'])
+        redirecting_to_payment_gateway_signal.send(sender=None, request=self.request, order=form.cleaned_data['order'],
+                                                   payment=payment, backend=form.cleaned_data['backend'])
 
         if gateway_url_tuple[1].upper() == 'GET':
             return HttpResponseRedirect(gateway_url_tuple[0])
@@ -43,8 +45,8 @@ class NewPaymentView(FormView):
             context['form'] = processor.get_form(gateway_url_tuple[2])
 
             return TemplateResponse(request=self.request,
-                template=self.get_template_names(),
-                context=context)
+                                    template=self.get_template_names(),
+                                    context=context)
         else:
             raise ImproperlyConfigured()
 

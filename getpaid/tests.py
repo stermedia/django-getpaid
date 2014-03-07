@@ -209,7 +209,6 @@ class PayUBackendTestCase(TestCase):
     def setUp(self):
         self.client = Client()
 
-
     def test_parse_text_result(self):
         t1 = '''status:OK
 
@@ -228,8 +227,7 @@ trans_sig:e4e981bfa780fa78fb077ca1f9295f2a
                              'trans_session_id': '48:1379695300.48',
                              'trans_ts': '1379695309225',
                              'trans_sig': 'e4e981bfa780fa78fb077ca1f9295f2a',
-                         }
-        )
+                         })
 
     def test_online_malformed(self):
         response = self.client.post(reverse('getpaid-payu-online'), {})
@@ -328,13 +326,12 @@ class Przelewy24PaymentProcessorTestCase(TestCase):
     def test_sig(self):
         # Test based on p24 documentation
         sig = przelewy24.PaymentProcessor.compute_sig({
-                                                          'key1': '9999',
-                                                          'key2': '2500',
-                                                          'key3': 'ccc',
-                                                          'key4': 'abcdefghijk',
-                                                          'crc': 'a123b456c789d012',
-
-                                                      }, ('key4', 'key1', 'key2', 'crc'), 'a123b456c789d012')
+            'key1': '9999',
+            'key2': '2500',
+            'key3': 'ccc',
+            'key4': 'abcdefghijk',
+            'crc': 'a123b456c789d012',
+        }, ('key4', 'key1', 'key2', 'crc'), 'a123b456c789d012')
         self.assertEqual(sig, 'e2c43dec9578633c518e1f514d3b434b')
 
     @mock.patch("urllib2.urlopen", fake_przelewy24_payment_get_response_success)
@@ -385,4 +382,3 @@ class Przelewy24PaymentProcessorTestCase(TestCase):
         self.assertEqual(payment.status, 'failed')
         self.assertEqual(payment.paid_on, None)
         self.assertEqual(payment.amount_paid, Decimal('0.0'))
-

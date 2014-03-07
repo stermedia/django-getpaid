@@ -7,6 +7,7 @@ from django.forms.widgets import HiddenInput, RadioSelect, RadioFieldRenderer, R
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
+
 from getpaid.models import Order
 from utils import get_backend_choices, import_name
 
@@ -20,7 +21,7 @@ class PaymentRadioInput(RadioInput):
                 getattr(settings, 'STATIC_URL', ''),
                 logo_url,
                 force_unicode(choice[1]),
-                )
+            )
             )
 
 

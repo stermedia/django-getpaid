@@ -1,20 +1,23 @@
+from datetime import datetime
+import sys
+
 from django.db import models
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
-from datetime import datetime
-import sys
+from django.conf import settings
+
 from abstract_mixin import AbstractMixin
 import signals
 from utils import import_backend_modules
-from django.conf import settings
+
 
 PAYMENT_STATUS_CHOICES = (
-        ('new', _("new")),
-        ('in_progress', _("in progress")),
-        ('partially_paid', _("partially paid")),
-        ('paid', _("paid")),
-        ('failed', _("failed")),
-        )
+    ('new', _("new")),
+    ('in_progress', _("in progress")),
+    ('partially_paid', _("partially paid")),
+    ('paid', _("paid")),
+    ('failed', _("failed")),
+)
 
 
 class PaymentManager(models.Manager):
@@ -115,7 +118,7 @@ class PaymentFactory(models.Model, AbstractMixin):
         self.change_status('failed')
 
 
-from django.db.models.loading import cache as app_cache, register_models
+from django.db.models.loading import cache as app_cache
 #from utils import import_backend_modules
 
 
@@ -127,7 +130,7 @@ def register_to_payment(order_class, **kwargs):
 
     This also will build a model class for every enabled backend.
     """
-    global Payment
+    global Payment  # flake8: noqa
     global Order
 
     class Payment(PaymentFactory.construct(order=order_class, **kwargs)):
