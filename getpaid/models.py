@@ -8,34 +8,50 @@ import signals
 from utils import import_backend_modules
 from django.conf import settings
 
-PAYMENT_STATUS_CHOICES = (
-        ('new', _("new")),
-        ('in_progress', _("in progress")),
-        ('partially_paid', _("partially paid")),
-        ('paid', _("paid")),
-        ('failed', _("failed")),
-        )
-
 
 class PaymentManager(models.Manager):
     def get_query_set(self):
-        return super(PaymentManager, self).get_query_set().select_related('order')
+        return super(PaymentManager, self).get_query_set().select_related(
+            'order')
+
+    def not_paid(self):
+        return self.exclude(status=self.model.PAYMENT_STATUS_PAID)
 
 
 class PaymentFactory(models.Model, AbstractMixin):
     """
-    This is an abstract class that defines a structure of Payment model that will be
-    generated dynamically with one additional field: ``order``
+    This is an abstract class that defines a structure of Payment model that
+    will be generated dynamically with one additional field: ``order``
     """
+    PAYMENT_STATUS_NEW = 'new'
+    PAYMENT_STATUS_IN_PROGRESS = 'in_progress'
+    PAYMENT_STATUS_PARTIALLY_PAID = 'partially_paid'
+    PAYMENT_STATUS_PAID = 'paid'
+    PAYMENT_STATUS_FAILED = 'failed'
+    PAYMENT_STATUS_CHOICES = (
+        (PAYMENT_STATUS_NEW, _("new")),
+        (PAYMENT_STATUS_IN_PROGRESS, _("in progress")),
+        (PAYMENT_STATUS_PARTIALLY_PAID, _("partially paid")),
+        (PAYMENT_STATUS_PAID, _("paid")),
+        (PAYMENT_STATUS_FAILED, _("failed")),
+    )
+
     amount = models.DecimalField(_("amount"), decimal_places=4, max_digits=20)
     currency = models.CharField(_("currency"), max_length=3)
-    status = models.CharField(_("status"), max_length=20, choices=PAYMENT_STATUS_CHOICES, default='new', db_index=True)
+    status = models.CharField(
+        _("status"), max_length=20, choices=PAYMENT_STATUS_CHOICES,
+        default=PAYMENT_STATUS_NEW, db_index=True)
     backend = models.CharField(_("backend"), max_length=50)
-    created_on = models.DateTimeField(_("created on"), auto_now_add=True, db_index=True)
-    paid_on = models.DateTimeField(_("paid on"), blank=True, null=True, default=None, db_index=True)
-    amount_paid = models.DecimalField(_("amount paid"), decimal_places=4, max_digits=20, default=0)
-    external_id = models.CharField(_("external id"), max_length=64, blank=True, null=True)
-    description = models.CharField(_("description"), max_length=128, blank=True, null=True)
+    created_on = models.DateTimeField(
+        _("created on"), auto_now_add=True, db_index=True)
+    paid_on = models.DateTimeField(
+        _("paid on"), blank=True, null=True, default=None, db_index=True)
+    amount_paid = models.DecimalField(
+        _("amount paid"), decimal_places=4, max_digits=20, default=0)
+    external_id = models.CharField(
+        _("external id"), max_length=64, blank=True, null=True)
+    description = models.CharField(
+        _("description"), max_length=128, blank=True, null=True)
 
     class Meta:
         abstract = True
@@ -116,7 +132,7 @@ class PaymentFactory(models.Model, AbstractMixin):
 
 
 from django.db.models.loading import cache as app_cache, register_models
-#from utils import import_backend_modules
+# from utils import import_backend_modules
 
 
 def register_to_payment(order_class, **kwargs):

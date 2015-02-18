@@ -59,12 +59,16 @@ class FallbackView(RedirectView):
     def get_redirect_url(self, **kwargs):
         self.payment = get_object_or_404(Payment, pk=self.kwargs['pk'])
 
-        if self.success:
+        if self.success == True:
             url_name = getattr(settings, 'GETPAID_SUCCESS_URL_NAME', None)
             if url_name is not None:
                 return reverse(url_name, kwargs={'pk': self.payment.order_id})
-        else:
+        elif self.success == False:
             url_name = getattr(settings, 'GETPAID_FAILURE_URL_NAME', None)
+            if url_name is not None:
+                return reverse(url_name, kwargs={'pk': self.payment.order_id})
+        elif self.success is None:
+            url_name = getattr(settings, 'GETPAID_INPROGGRESS_URL_NAME', None)
             if url_name is not None:
                 return reverse(url_name, kwargs={'pk': self.payment.order_id})
         return self.payment.order.get_absolute_url()

@@ -10,6 +10,7 @@ urlpatterns = patterns('',
     url(r'^new/payment/(?P<currency>[A-Z]{3})/$', NewPaymentView.as_view(), name='getpaid-new-payment'),
     url(r'^payment/success/(?P<pk>\d+)/$', FallbackView.as_view(success=True), name='getpaid-success-fallback'),
     url(r'^payment/failure/(?P<pk>\d+)$', FallbackView.as_view(success=False), name='getpaid-failure-fallback'),
+    url(r'^payment/inprogress/(?P<pk>\d+)$', FallbackView.as_view(), name='getpaid-inprogress-fallback'),
     *includes_list
 
 )
