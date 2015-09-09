@@ -3,7 +3,12 @@ from django.core.exceptions import ValidationError
 from django.forms import forms
 from django.forms.fields import ChoiceField, CharField
 from django.forms.models import ModelChoiceField
-from django.forms.widgets import HiddenInput, RadioSelect, RadioFieldRenderer, RadioInput
+from django.forms.widgets import HiddenInput, RadioSelect, RadioFieldRenderer
+# for django >= 1.8 compatibility
+try:
+    from django.forms.widgets import RadioInput
+except ImportError:
+    from django.forms.widgets import RadioChoiceInput as RadioInput
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
